@@ -32,7 +32,6 @@ import yimamapapi.skia.YimaLib;
 
 public class MainActivity extends AppCompatActivity implements SkiaDrawView.OnMapClickListener {
 
-    public static String FILE_PATH = Environment.getExternalStorageDirectory() + "/0yima_routes";
 
     private SkiaDrawView fMainView;
     private Toast toast;
@@ -52,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements SkiaDrawView.OnMa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         copyYimaFile();
+
+        //设置全屏
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         setContentView(R.layout.activity_main);
         getSupportActionBar().hide();
@@ -104,17 +106,20 @@ public class MainActivity extends AppCompatActivity implements SkiaDrawView.OnMa
             if (count == 0) {
                 return;
             }
-
             fMainView.mYimaLib.DeleteRouteWayPoint(routeID, count - 1, 1);
             fMainView.mYimaLib.DeleteWayPoint(ids[ids.length - 1]);
             fMainView.postInvalidate();
 
-            if (count == 1) {
-                firstWp = -1;
-                routeID = -1;
-            } else if (count == 2) {
-                secondWp = -1;
-            }
+//            fMainView.mYimaLib.DeleteRouteWayPoint(routeID, count - 1, 1);
+//            fMainView.mYimaLib.DeleteWayPoint(ids[ids.length - 1]);
+//            fMainView.postInvalidate();
+//
+//            if (count == 1) {
+//                firstWp = -1;
+//                routeID = -1;
+//            } else if (count == 2) {
+//                secondWp = -1;
+//            }
         }
     }
 
@@ -123,7 +128,7 @@ public class MainActivity extends AppCompatActivity implements SkiaDrawView.OnMa
      * @param view
      */
     public void RouteSave_Event(View view) {
-        if (routeID == -1 || firstWp == -1) {
+        if (routeID == -1) {
             toast.setText("没有路径点");
             toast.show();
             return;
@@ -131,13 +136,13 @@ public class MainActivity extends AppCompatActivity implements SkiaDrawView.OnMa
 
         PermissionUtil.verifyStoragePermissions(this);
 
-        File filePath = new File(FILE_PATH);
+        File filePath = new File(Constant.ROUTE_FILE_PATH);
         if(!filePath.exists()) {
             filePath.mkdir();
         }
 
         long timestamp = new Date().getTime();
-        boolean saveOk = fMainView.mYimaLib.SaveRoutesToFile(FILE_PATH + "/" + timestamp);
+        boolean saveOk = fMainView.mYimaLib.SaveRoutesToFile(Constant.ROUTE_FILE_PATH + "/" + timestamp);
 
         if (saveOk) {
             toast.setText("保存成功: " + timestamp);
@@ -154,13 +159,21 @@ public class MainActivity extends AppCompatActivity implements SkiaDrawView.OnMa
     }
 
     /**
-     * 打开路径清单activity
+     * 打开导航activity
      * @param view
      */
     public void Navigation_Event(View view) {
         startActivity(new Intent( this, NavigationActivity.class));
     }
 
+
+    /**
+     * 清屏
+     * @param view
+     */
+    public void ClearRoute_Event(View view) {
+        clearRoute();
+    }
     /**
      * 将物理坐标变成整形
      * @param location
@@ -205,20 +218,28 @@ public class MainActivity extends AppCompatActivity implements SkiaDrawView.OnMa
         toast.setText(String .format("x: %.3f, y: %.3f", x, y));
         toast.show();
 
-        if (firstWp == -1) {
-            firstWp = fMainView.mYimaLib.AddWayPoint(m_point.x, m_point.y, "1", 20, "1");
-        } else if (secondWp == -1) {
-            secondWp = fMainView.mYimaLib.AddWayPoint(m_point.x, m_point.y, "1", 20, "1");
-            int[] wpids = {firstWp, secondWp};
-            routeID = fMainView.mYimaLib.AddRoute("航线", wpids, 2, true);
-            //int[] points = fMainView.mYimaLib.GetRouteWayPointsID(routeID);
-            //boolean bDelete = YimaLib.DeleteRoute(routeID);
+        if (routeID == -1) {
+            routeID = fMainView.mYimaLib.AddRoute("航线", new int[]{}, 0, true);
             fMainView.mYimaLib.SetPointSelectJudgeDist(30, 15);
-        } else {
-            int wp = fMainView.mYimaLib.AddWayPoint(m_point.x, m_point.y, "1", 20, "1");
-            int wpCount = fMainView.mYimaLib.GetRouteWayPointsCount(routeID);
-            fMainView.mYimaLib.AddRouteWayPoint(routeID, wpCount, new int[] {wp}, 1);
         }
+        int wp = fMainView.mYimaLib.AddWayPoint(m_point.x, m_point.y, "1", 20, "1");
+        int wpCount = fMainView.mYimaLib.GetRouteWayPointsCount(routeID);
+        fMainView.mYimaLib.AddRouteWayPoint(routeID, wpCount, new int[] {wp}, 1);
+
+//        if (firstWp == -1) {
+//            firstWp = fMainView.mYimaLib.AddWayPoint(m_point.x, m_point.y, "1", 20, "1");
+//        } else if (secondWp == -1) {
+//            secondWp = fMainView.mYimaLib.AddWayPoint(m_point.x, m_point.y, "1", 20, "1");
+//            int[] wpids = {firstWp, secondWp};
+//            routeID = fMainView.mYimaLib.AddRoute("航线", wpids, 2, true);
+//            //int[] points = fMainView.mYimaLib.GetRouteWayPointsID(routeID);
+//            //boolean bDelete = YimaLib.DeleteRoute(routeID);
+//            fMainView.mYimaLib.SetPointSelectJudgeDist(30, 15);
+//        } else {
+//            int wp = fMainView.mYimaLib.AddWayPoint(m_point.x, m_point.y, "1", 20, "1");
+//            int wpCount = fMainView.mYimaLib.GetRouteWayPointsCount(routeID);
+//            fMainView.mYimaLib.AddRouteWayPoint(routeID, wpCount, new int[] {wp}, 1);
+//        }
     }
 
     /**
@@ -235,9 +256,18 @@ public class MainActivity extends AppCompatActivity implements SkiaDrawView.OnMa
             case RouteListActivity.ACTIVITY_RESULT_ROUTE_SHOW:
                 clearRoute();
                 String fileName = data.getStringExtra("fileName");
-                // TODO: 读取路径文件 画路径
-                // TODO: 隐藏编辑按钮
-//                fMainView.mYimaLib.File;
+                Log.i(TAG, "load file: start");
+
+                fMainView.mYimaLib.AddRoutesFromFile(Constant.ROUTE_FILE_PATH + "/" + fileName);
+                int routeCount = fMainView.mYimaLib.GetRoutesCount();
+                routeID = fMainView.mYimaLib.GetRouteIDFromPos(routeCount - 1);
+
+                Log.i(TAG, "GetRoutesCount: " + fMainView.mYimaLib.GetRoutesCount());
+                Log.i(TAG, "routeID: " + routeID);
+
+                Log.i(TAG, "load file: end");
+
+                Log.i(TAG, "==========================");
                 break;
             case RouteListActivity.ACTIVITY_RESULT_ROUTE_ADD:
                 clearRoute();
@@ -247,26 +277,33 @@ public class MainActivity extends AppCompatActivity implements SkiaDrawView.OnMa
         }
     }
 
+    private String TAG = "debug-qh";
     private void clearRoute() {
+        Log.i(TAG, "==========================");
+
+        Log.i(TAG, "clearRoute: start");
         // 如果有路径，则清除
         if (routeID != -1) {
+            Log.i(TAG, "clearRoute: " + routeID);
+
             int[] ids = fMainView.mYimaLib.GetRouteWayPointsID(routeID);
             fMainView.mYimaLib.DeleteRouteWayPoint(routeID, 0, ids.length); // 必须在调用DeleteWayPoint之前
             for (int id : ids) {
                 fMainView.mYimaLib.DeleteWayPoint(id);
             }
-            fMainView.mYimaLib.DeleteRoute(routeID);
-            routeID = -1;
-            firstWp = -1;
-            secondWp = -1;
+//            fMainView.mYimaLib.DeleteRoute(routeID);
+//            routeID = -1;
+//            firstWp = -1;
+//            secondWp = -1;
         }
 
-        // 如果只有一个路径点，也清除
-        if (firstWp != -1) {
-            fMainView.mYimaLib.DeleteWayPoint(firstWp);
-            firstWp = -1;
-        }
+//        // 如果只有一个路径点，也清除
+//        if (firstWp != -1) {
+//            fMainView.mYimaLib.DeleteWayPoint(firstWp);
+//            firstWp = -1;
+//        }
 
         fMainView.postInvalidate();
+        Log.i(TAG, "clearRoute: end");
     }
 }

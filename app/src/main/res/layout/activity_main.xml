@@ -13,6 +13,60 @@
         android:layout_height="match_parent"/>
 
     <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="Navigation_Event"
+            android:text="导航"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="RouteList_Event"
+            android:text="目录"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@id/ly_bottom"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/btn_zoom_out"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="ZoomOutClick_Event"
+            android:text="-"
+            />
+
+        <Button
+            android:id="@+id/btn_zoom_in"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:onClick="ZoomInClick_Event"
+            android:text="+"
+            />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ly_bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
@@ -24,35 +78,9 @@
         app:layout_constraintStart_toStartOf="parent"
         android:gravity="right">
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="导航"
-            android:onClick="Navigation_Event"
-            />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="目录"
-            android:onClick="RouteList_Event"
-            />
 
-        <Button
-            android:id="@+id/btn_zoom_out"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="-"
-            android:onClick="ZoomOutClick_Event"
-            />
 
-        <Button
-            android:id="@+id/btn_zoom_in"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="+"
-            android:onClick="ZoomInClick_Event"
-            />
 
         <Button
             android:id="@+id/btn_cancel"
@@ -60,6 +88,13 @@
             android:layout_height="wrap_content"
             android:text="撤销"
             android:onClick="PointCancel_Event"
+            />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="清空"
+            android:onClick="ClearRoute_Event"
             />
 
         <Button
